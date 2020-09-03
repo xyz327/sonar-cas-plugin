@@ -25,10 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.web.ServletFilter;
 import org.sonar.plugins.cas.logout.LogoutHandler;
+import org.sonar.plugins.cas.util.Cookies;
 import org.sonar.plugins.cas.util.HttpStreams;
 import org.sonar.plugins.cas.util.SonarCasProperties;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -55,7 +57,7 @@ public class ForceCasLoginFilter extends ServletFilter {
      * Array of request URLS that should not be redirected to the login page.
      */
     private static final List<String> WHITE_LIST = Arrays.asList(
-            "/sessions/", "/api/", "/batch_bootstrap/", "/deploy/", "/batch");
+            "/sessions/", "/api/", "/batch_bootstrap/", "/deploy/", "/batch","/maintenance");
 
     private final Configuration configuration;
     private LogoutHandler logoutHandler;
@@ -74,6 +76,12 @@ public class ForceCasLoginFilter extends ServletFilter {
 
         HttpServletRequest request = HttpStreams.toHttp(servletRequest);
         HttpServletResponse response = HttpStreams.toHttp(servletResponse);
+
+        // nosso  sonar.example.com/?nosso
+        if(request.getParameter("nosso")!=null){
+            chain.doFilter(servletRequest, servletResponse);
+            return;
+        }
         String requestedURL = request.getRequestURL().toString();
         int maxRedirectCookieAge = getMaxCookieAge(configuration);
 
@@ -88,11 +96,15 @@ public class ForceCasLoginFilter extends ServletFilter {
                 chain.doFilter(request, servletResponse);
             }
         } else {
-            LOG.debug("Found unauthenticated request or request not in whitelist: {}. Redirecting to login page",
-                    requestedURL);
-            // keep the original URL during redirectToLogin to the CAS server in order to have the URL opened as intended by the user
-            HttpStreams.saveRequestedURLInCookie(request, response, maxRedirectCookieAge);
-            redirectToLogin(request, response);
+            if(!SonarCasProperties.FORCE_CAS_LOGIN.getBoolean(configuration, false)){
+                chain.doFilter(request, response);
+            } else {
+                LOG.debug("Found unauthenticated request or request not in whitelist: {}. Redirecting to login page",
+                        requestedURL);
+                // keep the original URL during redirectToLogin to the CAS server in order to have the URL opened as intended by the user
+                HttpStreams.saveRequestedURLInCookie(request, response, maxRedirectCookieAge);
+                redirectToLogin(request, response);
+            }
         }
     }
 
@@ -107,6 +119,11 @@ public class ForceCasLoginFilter extends ServletFilter {
     }
 
     private boolean isAuthenticated(HttpServletRequest request) {
+
+        Cookie cookie = Cookies.findCookieByName(request.getCookies(), Cookies.JWT_SESSION_COOKIE);
+        if(cookie != null){
+            return true;
+        }
         // https://github.com/SonarSource/sonarqube/blob/9973bacbfa4a945e509bf1b574d7e5aae4ba155a/server/sonar-server/src/main/java/org/sonar/server/authentication/UserSessionInitializer.java#L138
         String login = StringUtils.defaultString((String) request.getAttribute("LOGIN"));
         return !"-".equals(login);

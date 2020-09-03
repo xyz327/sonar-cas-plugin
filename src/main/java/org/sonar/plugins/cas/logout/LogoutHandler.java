@@ -1,5 +1,6 @@
 package org.sonar.plugins.cas.logout;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.config.Configuration;
@@ -21,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import static org.sonar.plugins.cas.util.Cookies.JWT_SESSION_COOKIE;
 
@@ -95,7 +97,7 @@ public class LogoutHandler {
             // Security advice:
             // Do NOT remove the user's token from the session store. It must stay blacklisted until it is removed
             // during the expiration date check.
-            removeAuthCookies(response, request.getContextPath());
+            removeAuthCookies(response, StringUtils.isBlank(request.getContextPath()) ? "/": request.getContextPath());
         }
     }
 

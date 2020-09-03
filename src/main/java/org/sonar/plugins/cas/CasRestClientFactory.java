@@ -6,18 +6,20 @@ import org.sonar.plugins.cas.util.SonarCasProperties;
 
 @ServerSide
 public final class CasRestClientFactory {
+    private final CasSettings casSettings;
     private CasRestClient impl;
     private Configuration configuration;
 
     /** This constructor is used with Dependency Injection during SonarQube start-up time*/
     @SuppressWarnings("unused")
-    public CasRestClientFactory(Configuration configuration) {
-        this.configuration = configuration;
+    public CasRestClientFactory(CasSettings casSettings) {
+        this.casSettings = casSettings;
     }
 
     CasRestClientFactory(Configuration configuration, CasRestClient impl) {
         this.configuration = configuration;
         this.impl = impl;
+        casSettings = null;
     }
 
     CasRestClient create() {
@@ -31,10 +33,10 @@ public final class CasRestClientFactory {
     }
 
     private String getCasServerUrlPrefix() {
-        return SonarCasProperties.CAS_SERVER_URL_PREFIX.mustGetString(configuration);
+        return casSettings.getCasServerUrl();
     }
 
     private String getServiceUrl() {
-        return SonarCasProperties.SONAR_SERVER_URL.mustGetString(configuration);
+        return casSettings.getSonarServerUrl();
     }
 }

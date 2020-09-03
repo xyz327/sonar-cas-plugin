@@ -61,30 +61,34 @@ public final class CasPlugin implements Plugin {
         } else {
             LOG.info("skip all extensions, because we are on the {} side", sonarQubeSide);
         }
+
     }
 
     List<Object> collectExtensions() {
         List<Object> extensions = new ArrayList<>();
-
+        extensions.add(CasSettings.class);
         extensions.add(DevelopmentServerStartHandler.class);
         extensions.add(CasAttributeSettings.class);
 
         extensions.add(CasTicketValidatorFactory.class);
         extensions.add(CasRestClientFactory.class);
         extensions.add(CasSessionStoreFactory.class);
-        extensions.add(SessionStoreCleaner.class);
+        //extensions.add(SessionStoreCleaner.class);
 
         extensions.add(LoginHandler.class);
         extensions.add(LogoutHandler.class);
-        extensions.add(CasIdentityProvider.class);
+        //extensions.add(CasIdentityProvider.class);
+        extensions.add(CasOauth2IdentityProvider.class);
+
         extensions.add(CasSecurityRealm.class);
 
-        extensions.add(ForceCasLoginFilter.class);
-        extensions.add(AuthenticationFilter.class);
-        extensions.add(CasTokenRefreshFilter.class);
+        //extensions.add(ForceCasLoginFilter.class);
+       // extensions.add(AuthenticationFilter.class);
+       // extensions.add(CasTokenRefreshFilter.class);
 
         extensions.add(CasSonarSignOutInjectorFilter.class);
 
+        extensions.addAll(CasSettings.definitions());
         return extensions;
     }
 }

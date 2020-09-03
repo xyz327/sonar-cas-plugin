@@ -3,6 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+
+    <parent>
+        <groupId>org.sonarsource.parent</groupId>
+        <artifactId>parent</artifactId>
+        <version>52</version>
+    </parent>
     <groupId>com.cloudogu.sonar</groupId>
     <artifactId>sonar-cas-plugin</artifactId>
     <version>2.0.2</version>
@@ -62,7 +68,8 @@
 
     <properties>
         <!-- for unknown reasons the Sonar plugin API watches the product version while the server version does not -->
-        <sonar.pluginapi.version>7.9.1</sonar.pluginapi.version>
+<!--        <sonar.pluginapi.version>7.9.1</sonar.pluginapi.version>-->
+        <sonar.pluginapi.version>8.0</sonar.pluginapi.version>
         <sonar.server.version>7.1</sonar.server.version>
         <cas.version>3.5.0</cas.version>
         <jjwt.version>0.9.1</jjwt.version>
@@ -87,12 +94,12 @@
         </dependency>
 
         <!-- sonar-server for debugging-->
-        <dependency>
-            <groupId>org.sonarsource.sonarqube</groupId>
-            <artifactId>sonar-server</artifactId>
-            <version>${sonar.server.version}</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.sonarsource.sonarqube</groupId>-->
+<!--            <artifactId>sonar-server</artifactId>-->
+<!--            <version>${sonar.server.version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -205,7 +212,7 @@
             <plugin>
                 <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
-                <version>1.17</version>
+                <version>1.18.0.372</version>
                 <extensions>true</extensions>
                 <configuration>
                     <pluginKey>casplugin</pluginKey>

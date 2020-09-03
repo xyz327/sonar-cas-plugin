@@ -28,7 +28,9 @@ function logoutHandler() {
         var elem4 = elem3.getElementsByTagName('a')[1];
         if (elem4) {
             elem4.addEventListener('click', function (event) {
-                window.location.href = 'CASLOGOUTURL';
+                Ajax.post("/api/authentication/logout", null, function () {
+                    window.location.href = 'CASLOGOUTURL';
+                })
                 event.stopImmediatePropagation();
                 return false;
             });
@@ -36,4 +38,35 @@ function logoutHandler() {
         }
 
     }, 100);
+}
+var Ajax = {
+    get: function(url,fn){
+        var xhr=new XMLHttpRequest();
+        xhr.open('GET',url,false);
+        xhr.onreadystatechange=function(){
+            if(xhr.readyState==4){
+                if(xhr.status==200 || xhr.status==304){
+                    console.log(xhr.responseText);
+                    fn.call(xhr.responseText);
+                }
+            }
+        }
+        xhr.send();
+    },
+
+    post: function(url,data,fn){
+        var xhr=new XMLHttpRequest();
+        xhr.open('POST',url,false);
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+        xhr.onreadystatechange=function(){
+            if (xhr.readyState==4){
+                if (xhr.status==200 || xhr.status==304){
+                    // console.log(xhr.responseText);
+                    fn.call(xhr.responseText);
+                }
+            }
+        }
+
+        xhr.send(data);
+    }
 }

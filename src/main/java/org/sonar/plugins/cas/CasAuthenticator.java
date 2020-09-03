@@ -49,6 +49,7 @@ import java.util.Map;
  *
  * @author Sebastian Sdorra, Cloudogu GmbH
  */
+@Deprecated
 @ServerSide
 public class CasAuthenticator extends Authenticator {
 

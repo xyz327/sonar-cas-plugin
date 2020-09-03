@@ -26,12 +26,13 @@ import java.util.Locale;
 @ServerSide
 public final class CasTicketValidatorFactory implements TicketValidatorFactory {
     private static final String DEFAULT_CAS_PROTOCOL = "cas3";
-    private final Configuration configuration;
+    private final CasSettings casSettings;
 
-    public CasTicketValidatorFactory(Configuration configuration) {
-        this.configuration = configuration;
+    public CasTicketValidatorFactory(CasSettings casSettings) {
+        this.casSettings = casSettings;
     }
 
+    @Override
     public TicketValidator create() {
         String protocol = getCasProtocol();
         TicketValidator validator;
@@ -50,11 +51,11 @@ public final class CasTicketValidatorFactory implements TicketValidatorFactory {
     }
 
     private String getCasProtocol() {
-        return SonarCasProperties.CAS_PROTOCOL.getString(configuration, DEFAULT_CAS_PROTOCOL).toLowerCase(Locale.ENGLISH);
+        return casSettings.getCasProtocol().toLowerCase(Locale.ENGLISH);
     }
 
     private String getCasServerUrlPrefix() {
-        return SonarCasProperties.CAS_SERVER_URL_PREFIX.mustGetString(configuration);
+        return casSettings.getCasServerUrl();
     }
 
     private Saml11TicketValidator createSaml11TicketValidator() {
@@ -62,7 +63,8 @@ public final class CasTicketValidatorFactory implements TicketValidatorFactory {
 
         // the validator's internal tolerance is already at 1000 millis so the drifting tolerance does not
         // need to be set at any circumstance.
-        int tolerance = SonarCasProperties.SAML11_TIME_TOLERANCE.getInteger(configuration, -1);
+        //int tolerance = SonarCasProperties.SAML11_TIME_TOLERANCE.getInteger(configuration, -1);
+        int tolerance = -1;
         if (tolerance != -1) {
             saml11TicketValidator.setTolerance(tolerance);
         }

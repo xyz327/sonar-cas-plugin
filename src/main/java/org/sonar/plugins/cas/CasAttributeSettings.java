@@ -35,13 +35,13 @@ import java.util.*;
 @ServerSide
 public class CasAttributeSettings {
 
-    private final Configuration config;
+    private final CasSettings casSettings;
 
     /**
      * called with injection by SonarQube during server initialization
      */
-    public CasAttributeSettings(Configuration configuration) {
-        config = configuration;
+    public CasAttributeSettings(CasSettings casSettings) {
+        this.casSettings = casSettings;
     }
 
     Set<String> getGroups(Map<String, Object> attributes) {
@@ -56,9 +56,9 @@ public class CasAttributeSettings {
     }
 
     private List<String> getRoleAttributes() {
-        final String str = SonarCasProperties.ROLES_ATTRIBUTE.getString(config, "");
+        final String str = casSettings.getRolesAttribute();
         if (!str.isEmpty()) {
-            return Arrays.asList(str.split("\\s*,\\s*"));
+            return Arrays.asList(str.split(","));
         }
         return Collections.emptyList();
     }
@@ -79,21 +79,16 @@ public class CasAttributeSettings {
     }
 
     String getEmail(Map<String, Object> attributes) {
-        String mailAttribute = getMailAttribute();
+        String mailAttribute = casSettings.getEmailAttribute();
         return getStringAttribute(attributes, mailAttribute);
     }
 
-    private String getMailAttribute() {
-        return SonarCasProperties.EMAIL_ATTRIBUTE.getString(config, "mail");
-    }
+
 
     String getDisplayName(Map<String, Object> attributes) {
-        return getStringAttribute(attributes, getFullNameAttribute());
+        return getStringAttribute(attributes, casSettings.getFullNameAttribute());
     }
 
-    private String getFullNameAttribute() {
-        return SonarCasProperties.FULL_NAME_ATTRIBUTE.getString(config, "cn");
-    }
 
     private String getStringAttribute(Map<String, Object> attributes, String key) {
         return (String) attributes.get(key);

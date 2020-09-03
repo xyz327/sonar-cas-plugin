@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.web.ServletFilter;
+import org.sonar.plugins.cas.CasSettings;
 import org.sonar.plugins.cas.util.SonarCasProperties;
 
 import javax.servlet.FilterChain;
@@ -48,6 +49,7 @@ public final class CasSonarSignOutInjectorFilter extends ServletFilter {
     private static final Logger LOG = LoggerFactory.getLogger(CasSonarSignOutInjectorFilter.class);
     private static final String CASLOGOUTURL_PLACEHOLDER = "CASLOGOUTURL";
     private final Configuration config;
+    private final CasSettings casSettings;
     ClassLoader resourceClassloader;
     // cachedJsInjection stores logout javascript being injected in HTML resources. This cache only invalidates by
     // Sonar restart. As this injection relies on values from the sonar-cas properties SonarQube must be restarted as
@@ -61,20 +63,13 @@ public final class CasSonarSignOutInjectorFilter extends ServletFilter {
     /**
      * called with injection by SonarQube during server initialization
      */
-    public CasSonarSignOutInjectorFilter(Configuration configuration) {
+    public CasSonarSignOutInjectorFilter(Configuration configuration, CasSettings casSettings) {
         this.config = configuration;
+        this.casSettings = casSettings;
         this.cachedJsInjection = "";
         this.resourceClassloader = CasSonarSignOutInjectorFilter.class.getClassLoader();
     }
 
-    /**
-     * for testing
-     */
-    CasSonarSignOutInjectorFilter(Configuration configuration, ClassLoader resourceClassloader) {
-        this.config = configuration;
-        this.cachedJsInjection = "";
-        this.resourceClassloader = resourceClassloader;
-    }
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -145,7 +140,9 @@ public final class CasSonarSignOutInjectorFilter extends ServletFilter {
     }
 
     private String getCasLogoutUrl() {
-        return SonarCasProperties.CAS_SERVER_LOGOUT_URL.mustGetString(config);
+        String logoutService = casSettings.getLogoutRedirect() ? ("?service="+casSettings.getSonarServerUrl()):"";
+        return casSettings.getCasServerLogoutUrl() + logoutService;
+
     }
 
     public void destroy() {
